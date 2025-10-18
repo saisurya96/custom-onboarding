@@ -8,8 +8,8 @@ A 3-step, admin-configurable onboarding wizard with a public data table.
 
 ## Live
 
-- Netlify: <your-site-url>
-- GitHub: <your-repo-url>
+- Netlify: https://brilliant-travesseiro-dea50f.netlify.app/
+- GitHub: https://github.com/saisurya96/custom-onboarding
 
 ## Features
 
