@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
 type Config = { page2: string[]; page3: string[] };
@@ -28,13 +28,16 @@ export default function Onboarding() {
     queryFn: () => api<Config>('config'),
   });
 
-  useQuery({
+  const meQuery = useQuery({
     queryKey: ['me'],
     queryFn: () => api<{ currentStep: number }>('onboarding-me'),
     retry: false,
     staleTime: 0,
-    onSuccess: (d) => setStep(d.currentStep ?? 1),
   });
+
+  useEffect(() => {
+    if (meQuery.data?.currentStep) setStep(meQuery.data.currentStep);
+  }, [meQuery.data]);
 
   const start = useMutation({
     mutationFn: (body: { email: string; password: string }) =>

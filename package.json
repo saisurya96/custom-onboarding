@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@netlify/functions": "^2.7.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie": "^0.6.0",
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.5",
