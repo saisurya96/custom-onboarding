@@ -22,6 +22,7 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
 export default function Onboarding() {
   const qc = useQueryClient();
   const [step, setStep] = useState(1);
+  const [formState, setFormState] = useState<Record<string, string>>({});
 
   const { data: config } = useQuery<Config>({
     queryKey: ['config'],
@@ -30,7 +31,7 @@ export default function Onboarding() {
 
   const meQuery = useQuery({
     queryKey: ['me'],
-    queryFn: () => api<{ currentStep: number }>('onboarding-me'),
+    queryFn: () => api<{ currentStep: number; config?: Config }>('onboarding-me'),
     retry: false,
     staleTime: 0,
   });
@@ -63,7 +64,9 @@ export default function Onboarding() {
       {step === 2 && (
         <DynamicStep
           fields={config.page2}
-          onSubmit={(data) => save.mutate({ step: 2, data })}
+          initial={formState}
+          onBack={() => setStep(1)}
+          onSubmit={(data) => { setFormState({ ...formState, ...data }); save.mutate({ step: 2, data }); }}
           loading={save.isPending}
         />
       )}
@@ -71,7 +74,9 @@ export default function Onboarding() {
       {step === 3 && (
         <DynamicStep
           fields={config.page3}
-          onSubmit={(data) => save.mutate({ step: 3, data })}
+          initial={formState}
+          onBack={() => setStep(2)}
+          onSubmit={(data) => { setFormState({ ...formState, ...data }); save.mutate({ step: 3, data }); }}
           loading={save.isPending}
         />
       )}
@@ -123,8 +128,8 @@ function CredentialsForm({ onSubmit, loading }: { onSubmit: (v: { email: string;
   );
 }
 
-function DynamicStep({ fields, onSubmit, loading }: { fields: string[]; onSubmit: (data: Record<string, unknown>) => void; loading: boolean }) {
-  const [form, setForm] = useState<Record<string, string>>({});
+function DynamicStep({ fields, initial, onBack, onSubmit, loading }: { fields: string[]; initial?: Record<string, string>; onBack?: () => void; onSubmit: (data: Record<string, string>) => void; loading: boolean }) {
+  const [form, setForm] = useState<Record<string, string>>(initial ?? {});
   return (
     <form
       className="space-y-4"
@@ -165,9 +170,16 @@ function DynamicStep({ fields, onSubmit, loading }: { fields: string[]; onSubmit
           <input className="w-full border rounded p-2" type="date" value={form.birthdate ?? ''} onChange={(e) => setForm({ ...form, birthdate: e.target.value })} />
         </div>
       )}
-      <button className="btn px-4 py-2 bg-blue-600 text-white rounded" disabled={loading}>
-        {loading ? 'Saving…' : 'Continue'}
-      </button>
+      <div className="flex gap-2">
+        {onBack && (
+          <button type="button" className="px-4 py-2 border rounded" onClick={onBack}>
+            Back
+          </button>
+        )}
+        <button className="btn px-4 py-2 bg-blue-600 text-white rounded" disabled={loading}>
+          {loading ? 'Saving…' : 'Continue'}
+        </button>
+      </div>
     </form>
   );
 }

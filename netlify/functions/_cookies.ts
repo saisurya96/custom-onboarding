@@ -3,10 +3,11 @@ import { randomUUID } from 'node:crypto';
 
 export function ensureSessionCookie(existing?: string | null) {
   const id = existing ?? randomUUID();
+  const secure = process.env.NODE_ENV === 'production';
   const cookie = serialize('onboarding_session_id', id, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: true,
+    secure,
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
   });
@@ -22,6 +23,17 @@ export function parseCookieFromHeaders(headers: Headers) {
     if (k === 'onboarding_session_id') return decodeURIComponent(v);
   }
   return null;
+}
+
+export function clearSessionCookie() {
+  const secure = process.env.NODE_ENV === 'production';
+  return serialize('onboarding_session_id', '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+    path: '/',
+    maxAge: 0,
+  });
 }
 
 
